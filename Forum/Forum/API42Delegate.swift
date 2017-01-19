@@ -9,6 +9,6 @@
 import UIKit
 
 protocol API42Delegate: class {
-    func handleTopic(topics: [Topic])
-    func handleError(error: NSError)
+    func handleTopic(_ topics: [Topic])
+    func handleError(_ error: NSError)
 }

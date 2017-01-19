@@ -28,7 +28,7 @@ class ForumViewController: UIViewController, API42Delegate, UITableViewDataSourc
         self.api?.getTopic(self.page)
     }
     
-    override func viewDidAppear(animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         print("prout")
         self.api = APIController(delegate: delegate, token: tokenObj!)
         self.page = 1
@@ -37,79 +37,79 @@ class ForumViewController: UIViewController, API42Delegate, UITableViewDataSourc
         self.api?.getTopic(self.page)
     }
     
-    @IBAction func unwindSegue2(segue: UIStoryboardSegue) {
+    @IBAction func unwindSegue2(_ segue: UIStoryboardSegue) {
     }
     
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "goLogout" {
-            let vc = segue.destinationViewController as! ViewController
+            let vc = segue.destination as! ViewController
             vc.logOut = true
         }
         else if segue.identifier == "goMessage" {
-            let vc = segue.destinationViewController as! MessageViewController
+            let vc = segue.destination as! MessageViewController
             let cell = sender as! TableViewCell
             vc.topicId = cell.topicId
             vc.tokenObj = self.tokenObj
         }
         else if segue.identifier == "addTopic" {
-            let vc = segue.destinationViewController as! addTopicController
+            let vc = segue.destination as! addTopicController
             vc.api = self.api
             vc.delegate = self.delegate
             vc.tokenObj = self.tokenObj
         }
     }
     
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return topics.count
     }
     
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("topicCell") as! TableViewCell!
-        cell.nameLabel.text = topics[indexPath.row].name
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "topicCell") as! TableViewCell!
+        cell?.nameLabel.text = topics[indexPath.row].name
         let obj = topics[indexPath.row].author as NSDictionary
-        let author = obj.valueForKey("login") as! String
-        cell.authorLabel.text = author
-        let dateFormatter = NSDateFormatter()
+        let author = obj.value(forKey: "login") as! String
+        cell?.authorLabel.text = author
+        let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "dd/MM/yyyy hh:mm"
-        dateFormatter.calendar = NSCalendar(calendarIdentifier: NSCalendarIdentifierISO8601)
-        dateFormatter.locale = NSLocale(localeIdentifier: "en_US_POSIX")
-        dateFormatter.timeZone = NSTimeZone(forSecondsFromGMT: 0)
+        dateFormatter.calendar = Calendar(identifier: Calendar.Identifier.iso8601)
+        dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+        dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
         let dateString = topics[indexPath.row].created_at
         dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSXXXXX"
-        let dateObj = dateFormatter.dateFromString(dateString)
+        let dateObj = dateFormatter.date(from: dateString)
         dateFormatter.dateFormat = "dd/MM/yyyy"
-        let str = dateFormatter.stringFromDate(dateObj!)
-        cell.dateLabel.text = str
-        cell.topicId = topics[indexPath.row].id
+        let str = dateFormatter.string(from: dateObj!)
+        cell?.dateLabel.text = str
+        cell?.topicId = topics[indexPath.row].id
         
-        return cell
+        return cell!
     }
 
-    func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return UITableViewAutomaticDimension
     }
     
-    func tableView(tableView: UITableView, estimatedHeightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+    func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
         return UITableViewAutomaticDimension
     }
     
-    func tableView(tableView: UITableView, willDisplayCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath) {
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         if indexPath.row % 2 == 0 {
-            cell.backgroundColor = UIColor.lightGrayColor()
+            cell.backgroundColor = UIColor.lightGray
         }
         else {
-            cell.backgroundColor = UIColor.whiteColor()
+            cell.backgroundColor = UIColor.white
         }
     }
     
-    func handleTopic(topics: [Topic]) {
+    func handleTopic(_ topics: [Topic]) {
         self.topics = topics
         tableView.reloadData()
         self.flag = false
         
     }
     
-    func scrollViewDidScroll(scrollView: UIScrollView) {
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
         if topics.count != 0 {
             if tableView.contentOffset.y<0 {
                 return;
@@ -124,7 +124,7 @@ class ForumViewController: UIViewController, API42Delegate, UITableViewDataSourc
         }
     }
     
-    func handleError(error: NSError) {
+    func handleError(_ error: NSError) {
         print(error)
     }
 }

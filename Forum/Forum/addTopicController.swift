@@ -23,16 +23,16 @@ class addTopicController: UIViewController {
     }
 
     
-    @IBAction func saveFunc(sender: AnyObject) {
+    @IBAction func saveFunc(_ sender: AnyObject) {
         if !(titleLabel.text?.isEmpty)! {
             if !contentLabel.text.isEmpty {
                 api?.postAPI(titleLabel.text!, topicContent: contentLabel.text)
-                performSegueWithIdentifier("unwindForum", sender: "Foo")
+                performSegue(withIdentifier: "unwindForum", sender: "Foo")
             }
         }
     }
     
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
     
     }
 }

@@ -20,9 +20,9 @@ class APIController {
         self.tokenObj = token
     }
     
-    func postAPI(topicTitle: String, topicContent:String ) {
-        let defaults = NSUserDefaults.standardUserDefaults()
-        if let authorID: String = defaults.stringForKey("authorId") {
+    func postAPI(_ topicTitle: String, topicContent:String ) {
+        let defaults = UserDefaults.standard
+        if let authorID: String = defaults.string(forKey: "authorId") {
             let tab: [String: AnyObject] = [
                 "topic": [
                     "author_id": authorID,
@@ -39,23 +39,23 @@ class APIController {
                     "tag_ids": [
                         "8"
                     ]
-                ]
+                ] as AnyObject
             ]
             do {
-                let params = try NSJSONSerialization.dataWithJSONObject(tab, options: [])
-                    let my_mutableURLRequest = NSMutableURLRequest(URL: NSURL(string : "https://api.intra.42.fr/v2/topics?access_token=" + (tokenObj?.access_token)!)!)
-                    my_mutableURLRequest.HTTPMethod = "POST"
+                let params = try JSONSerialization.data(withJSONObject: tab, options: [])
+                    var my_mutableURLRequest = URLRequest(url: URL(string : "https://api.intra.42.fr/v2/topics?access_token=" + (tokenObj?.access_token)!)!)
+                    my_mutableURLRequest.httpMethod = "POST"
                     my_mutableURLRequest.setValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
-                    my_mutableURLRequest.HTTPBody = params
-                    let session = NSURLSession.sharedSession()
-                    let task = session.dataTaskWithRequest(my_mutableURLRequest, completionHandler: { (data, response, error) -> Void in
+                    my_mutableURLRequest.httpBody = params
+                    let session = URLSession.shared
+                    let task = session.dataTask(with: my_mutableURLRequest, completionHandler: { (data, response, error) -> Void in
                         if let err = error {
                             print("error: \(err)")
                         } else if let d = data {
                             do {
-                                let jsondata = try NSJSONSerialization.JSONObjectWithData(d, options: NSJSONReadingOptions())
+                                let jsondata = try JSONSerialization.jsonObject(with: d, options: JSONSerialization.ReadingOptions())
                                 print(jsondata)
-                                dispatch_async(dispatch_get_main_queue(), {
+                                DispatchQueue.main.async(execute: {
                                     //       self.performSegueWithIdentifier("unwindCreateTopic", sender: "nada")
                                 })
                             } catch _{
@@ -72,26 +72,26 @@ class APIController {
         }
     }
     
-    func getResponse(topicId: Int, page: Int) {
-        let my_mutableURLRequest = NSMutableURLRequest(URL: NSURL(string : "https://api.intra.42.fr/v2/messages/\(topicId)/messages?access_token=" + (self.tokenObj?.access_token)! + "&page=\(page)")!)
-        my_mutableURLRequest.HTTPMethod = "GET"
-        let session = NSURLSession.sharedSession()
-        let task = session.dataTaskWithRequest(my_mutableURLRequest) {
+    func getResponse(_ topicId: Int, page: Int) {
+        var my_mutableURLRequest = URLRequest(url: URL(string : "https://api.intra.42.fr/v2/messages/\(topicId)/messages?access_token=" + (self.tokenObj?.access_token)! + "&page=\(page)")!)
+        my_mutableURLRequest.httpMethod = "GET"
+        let session = URLSession.shared
+        let task = session.dataTask(with: my_mutableURLRequest, completionHandler: {
             (data, response, error) in
             if let err = error {
                 print("error: \(err)")
             } else if let d = data {
                 do {
-                    if let jsondata : [NSDictionary] = try NSJSONSerialization.JSONObjectWithData(d, options:
-                        NSJSONReadingOptions.MutableContainers) as? [NSDictionary] {
+                    if let jsondata : [NSDictionary] = try JSONSerialization.jsonObject(with: d, options:
+                        JSONSerialization.ReadingOptions.mutableContainers) as? [NSDictionary] {
                         for topic in jsondata {
-                            let id = topic.valueForKey("id") as! Int
-                            let name = topic.valueForKey("content") as! String
-                            let author = topic.valueForKey("author") as! [String: AnyObject]
-                            let created_at = topic.valueForKey("created_at") as! String
+                            let id = topic.value(forKey: "id") as! Int
+                            let name = topic.value(forKey: "content") as! String
+                            let author = topic.value(forKey: "author") as! [String: AnyObject]
+                            let created_at = topic.value(forKey: "created_at") as! String
                             self.message.append(Topic(id: id, name: name, author: author, created_at: created_at))
                         }
-                        dispatch_async(dispatch_get_main_queue()) {
+                        DispatchQueue.main.async {
                             self.delegate?.handleTopic(self.message)
                         }
                     }
@@ -99,30 +99,30 @@ class APIController {
                     print("Connexion lost")
                 }
             }
-        }
+        })
         task.resume()
     }
     
-    func getMessage(topicId: Int, page: Int) {
-        let my_mutableURLRequest = NSMutableURLRequest(URL: NSURL(string : "https://api.intra.42.fr/v2/topics/\(topicId)/messages/?access_token=" + (self.tokenObj?.access_token)! + "&page=\(page)")!)
-        my_mutableURLRequest.HTTPMethod = "GET"
-        let session = NSURLSession.sharedSession()
-        let task = session.dataTaskWithRequest(my_mutableURLRequest) {
+    func getMessage(_ topicId: Int, page: Int) {
+        var my_mutableURLRequest = URLRequest(url: URL(string : "https://api.intra.42.fr/v2/topics/\(topicId)/messages/?access_token=" + (self.tokenObj?.access_token)! + "&page=\(page)")!)
+        my_mutableURLRequest.httpMethod = "GET"
+        let session = URLSession.shared
+        let task = session.dataTask(with: my_mutableURLRequest, completionHandler: {
             (data, response, error) in
             if let err = error {
                 print("error: \(err)")
             } else if let d = data {
                 do {
-                    if let jsondata : [NSDictionary] = try NSJSONSerialization.JSONObjectWithData(d, options:
-                        NSJSONReadingOptions.MutableContainers) as? [NSDictionary] {
+                    if let jsondata : [NSDictionary] = try JSONSerialization.jsonObject(with: d, options:
+                        JSONSerialization.ReadingOptions.mutableContainers) as? [NSDictionary] {
                         for topic in jsondata {
-                            let id = topic.valueForKey("id") as! Int
-                            let name = topic.valueForKey("content") as! String
-                            let author = topic.valueForKey("author") as! [String: AnyObject]
-                            let created_at = topic.valueForKey("created_at") as! String
+                            let id = topic.value(forKey: "id") as! Int
+                            let name = topic.value(forKey: "content") as! String
+                            let author = topic.value(forKey: "author") as! [String: AnyObject]
+                            let created_at = topic.value(forKey: "created_at") as! String
                             self.message.append(Topic(id: id, name: name, author: author, created_at: created_at))
                         }
-                        dispatch_async(dispatch_get_main_queue()) {
+                        DispatchQueue.main.async {
                             self.delegate?.handleTopic(self.message)
                         }
                     }
@@ -130,29 +130,29 @@ class APIController {
                     print("Connexion lost")
                 }
             }
-        }
+        }) 
         task.resume()
     }
     
-    func getTopic(page: Int) {
-        let my_mutableURLRequest = NSMutableURLRequest(URL: NSURL(string : "https://api.intra.42.fr/v2/topics?access_token=" + (self.tokenObj?.access_token)! + "&page=\(page)")!)
-        my_mutableURLRequest.HTTPMethod = "GET"
-        let session = NSURLSession.sharedSession()
-        let task = session.dataTaskWithRequest(my_mutableURLRequest) {
+    func getTopic(_ page: Int) {
+        var my_mutableURLRequest = URLRequest(url: URL(string : "https://api.intra.42.fr/v2/topics?access_token=" + (self.tokenObj?.access_token)! + "&page=\(page)")!)
+        my_mutableURLRequest.httpMethod = "GET"
+        let session = URLSession.shared
+        let task = session.dataTask(with: my_mutableURLRequest, completionHandler: {
             (data, response, error) in
             if let err = error {
                 print("error: \(err)")
             } else if let d = data {
                 do {
-                    if let jsondata : [NSDictionary] = try NSJSONSerialization.JSONObjectWithData(d, options: NSJSONReadingOptions.MutableContainers) as? [NSDictionary] {
+                    if let jsondata : [NSDictionary] = try JSONSerialization.jsonObject(with: d, options: JSONSerialization.ReadingOptions.mutableContainers) as? [NSDictionary] {
                         for topic in jsondata {
-                            let id = topic.valueForKey("id") as! Int
-                            let name = topic.valueForKey("name") as! String
-                            let author = topic.valueForKey("author") as! [String: AnyObject]
-                            let created_at = topic.valueForKey("created_at") as! String
+                            let id = topic.value(forKey: "id") as! Int
+                            let name = topic.value(forKey: "name") as! String
+                            let author = topic.value(forKey: "author") as! [String: AnyObject]
+                            let created_at = topic.value(forKey: "created_at") as! String
                             self.topics.append(Topic(id: id, name: name, author: author, created_at: created_at))
                         }
-                        dispatch_async(dispatch_get_main_queue()) {
+                        DispatchQueue.main.async {
                             self.delegate?.handleTopic(self.topics)
                         }
                     }
@@ -160,7 +160,7 @@ class APIController {
                     print("Connexion lost")
                 }
             }
-        }
+        }) 
         task.resume()
     }
 }
